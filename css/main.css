@@ -48,3 +48,17 @@ h1 {
     border-color: var(--selective-yellow);
     transform: scale(1);
 }
+
+.logo-rounded {
+    max-width: 150px;
+    border-radius: 15px;
+}
+
+.tiktok-link {
+    color: var(--black);
+    font-size: 1.2rem;
+}
+
+.share-btn {
+    margin-top: 20px;
+}
