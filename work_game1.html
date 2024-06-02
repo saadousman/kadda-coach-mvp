@@ -4,44 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Work Conversation 1</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrap.com/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Sans+MS:wght@400;700&display=swap">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
     <div class="container">
-        <div class="chat-container mt-5" id="chat-container">
+        <div class="text-center my-5">
+            <h1 id="conversation-title">Work Conversation 1</h1>
+        </div>
+        <div class="chat-container" id="conversation-dialogue">
             <!-- Messages will be loaded here -->
         </div>
         <div class="text-center mt-4">
             <button class="btn btn-success btn-lg" id="start-recording">Start Recording</button>
             <button class="btn btn-danger btn-lg d-none" id="stop-recording">Stop Recording</button>
         </div>
-        <div class="text-center mt-4 d-none" id="audio-player-container">
-            <audio id="audio-player" controls></audio>
+        <div class="text-center mt-4">
+            <audio id="recorded-audio" controls style="display: none;"></audio>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrap.com/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="js/game.js"></script>
     <script>
-        // Load conversation data from JSON file
-        fetch('assets/work_game1.json')
-            .then(response => response.json())
-            .then(data => {
-                const chatContainer = document.getElementById('chat-container');
-                data.messages.forEach((message, index) => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.classList.add('chat-message');
-                    messageDiv.id = (message.user ? 'user-message-' : 'app-message-') + (index + 1);
-                    messageDiv.textContent = message.user || message.app;
-                    messageDiv.style.backgroundColor = message.user ? '#e1ffc7' : '#c7e1ff';
-                    chatContainer.appendChild(messageDiv);
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('assets/work_game1.json')
+                .then(response => response.json())
+                .then(data => {
+                    const chatContainer = document.getElementById('conversation-dialogue');
+                    document.getElementById('conversation-title').innerText = data.title;
+                    data.messages.forEach((message, index) => {
+                        const userBubble = document.createElement('div');
+                        userBubble.className = 'dialogue-bubble user-bubble';
+                        userBubble.innerText = message.user;
+                        chatContainer.appendChild(userBubble);
+
+                        const appBubble = document.createElement('div');
+                        appBubble.className = 'dialogue-bubble app-bubble';
+                        appBubble.innerText = message.app;
+                        chatContainer.appendChild(appBubble);
+                    });
                 });
-                document.title = data.title;
+
+            document.getElementById('start-recording').addEventListener('click', startRecording);
+            document.getElementById('stop-recording').addEventListener('click', stopRecording);
+        });
+
+        let recognition;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let currentDialogueIndex = 0;
+        let isSpeaking = false;
+        let isListening = false;
+
+        function startRecording() {
+            document.getElementById('start-recording').style.display = 'none';
+            document.getElementById('stop-recording').style.display = 'block';
+            currentDialogueIndex = 0;
+
+            const userBubbles = document.getElementsByClassName('user-bubble');
+            const appBubbles = document.getElementsByClassName('app-bubble');
+
+            if (!('webkitSpeechRecognition' in window) || !navigator.mediaDevices) {
+                alert('Your browser does not support the necessary Web APIs');
+                return;
+            }
+
+            // Initialize MediaRecorder for voice recording
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = event => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(recordedChunks, { type: 'audio/mp3' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const recordedAudio = document.getElementById('recorded-audio');
+                        recordedAudio.src = audioUrl;
+                        recordedAudio.style.display = 'block'; // Show the audio player
+
+                        // Create a download link
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = audioUrl;
+                        downloadLink.download = 'conversation_recording.mp3';
+                        downloadLink.textContent = 'Download Recording';
+                        downloadLink.className = 'btn btn-success mt-4';
+                        document.body.appendChild(downloadLink);
+                    };
+                    mediaRecorder.start();
+                });
+
+            // Initialize SpeechRecognition for voice recognition
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = event => {
+                if (!isSpeaking && currentDialogueIndex < userBubbles.length) {
+                    userBubbles[currentDialogueIndex].classList.remove('highlighted');
+                    currentDialogueIndex++;
+                    if (currentDialogueIndex < userBubbles.length) {
+                        appBubbles[currentDialogueIndex - 1].classList.add('highlighted');
+                        speak(appBubbles[currentDialogueIndex - 1].innerText).then(() => {
+                            if (currentDialogueIndex < userBubbles.length) {
+                                userBubbles[currentDialogueIndex].classList.add('highlighted');
+                                recognition.start();
+                            } else {
+                                stopRecording();
+                            }
+                        });
+                    } else if (currentDialogueIndex === userBubbles.length) {
+                        appBubbles[currentDialogueIndex - 1].classList.add('highlighted');
+                        speak(appBubbles[currentDialogueIndex - 1].innerText).then(() => {
+                            stopRecording();
+                        });
+                    }
+                }
+            };
+
+            recognition.onerror = event => {
+                console.error('Speech recognition error:', event.error);
+            };
+
+            recognition.onend = () => {
+                if (!isSpeaking && currentDialogueIndex < userBubbles.length) {
+                    if (!isListening) {
+                        recognition.start();
+                    }
+                }
+            };
+
+            // Start the conversation with the user's first dialogue
+            userBubbles[currentDialogueIndex].classList.add('highlighted');
+            recognition.start();
+        }
+
+        function stopRecording() {
+            if (recognition) {
+                recognition.stop();
+            }
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+            }
+            document.getElementById('stop-recording').style.display = 'none';
+        }
+
+        function speak(text) {
+            return new Promise((resolve, reject) => {
+                recognition.stop(); // Stop recognition while speaking
+                isSpeaking = true;
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'en-US';
+                msg.onend = () => {
+                    isSpeaking = false;
+                    resolve();
+                };
+                msg.onerror = (event) => {
+                    isSpeaking = false;
+                    console.error('Speech synthesis error:', event.error);
+                    reject(event.error);
+                };
+                window.speechSynthesis.speak(msg);
             });
+        }
     </script>
 </body>
 </html>

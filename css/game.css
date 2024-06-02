@@ -7,25 +7,23 @@
     background-color: #fff;
 }
 
-.chat-message {
+.dialogue-bubble {
     padding: 10px;
     border-radius: 10px;
     margin: 10px 0;
 }
 
-#user-message-1, #user-message-2, #user-message-3, #user-message-4, #user-message-5,
-#user-message-6, #user-message-7, #user-message-8, #user-message-9, #user-message-10 {
+.user-bubble {
     background-color: #e1ffc7;
-    align-self: flex-start;
+    text-align: left;
 }
 
-#app-message-1, #app-message-2, #app-message-3, #app-message-4, #app-message-5,
-#app-message-6, #app-message-7, #app-message-8, #app-message-9, #app-message-10 {
+.app-bubble {
     background-color: #c7e1ff;
-    align-self: flex-end;
+    text-align: right;
 }
 
-.highlight {
+.highlighted {
     animation: glow 1s infinite alternate;
 }
 
