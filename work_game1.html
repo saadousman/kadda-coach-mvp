@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Conversation 1</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrap.com/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Sans+MS:wght@400;700&display=swap">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+    <div class="container">
+        <div class="chat-container mt-5" id="chat-container">
+            <!-- Messages will be loaded here -->
+        </div>
+        <div class="text-center mt-4">
+            <button class="btn btn-success btn-lg" id="start-recording">Start Recording</button>
+            <button class="btn btn-danger btn-lg d-none" id="stop-recording">Stop Recording</button>
+        </div>
+        <div class="text-center mt-4 d-none" id="audio-player-container">
+            <audio id="audio-player" controls></audio>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrap.com/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        // Load conversation data from JSON file
+        fetch('assets/work_game1.json')
+            .then(response => response.json())
+            .then(data => {
+                const chatContainer = document.getElementById('chat-container');
+                data.messages.forEach((message, index) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('chat-message');
+                    messageDiv.id = (message.user ? 'user-message-' : 'app-message-') + (index + 1);
+                    messageDiv.textContent = message.user || message.app;
+                    messageDiv.style.backgroundColor = message.user ? '#e1ffc7' : '#c7e1ff';
+                    chatContainer.appendChild(messageDiv);
+                });
+                document.title = data.title;
+            });
+    </script>
+</body>
+</html>
