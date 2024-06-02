@@ -27,13 +27,24 @@ h1 {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.btn-primary {
+.btn-game {
     background-color: var(--selective-yellow);
     border-color: var(--golden-brown);
     border-radius: 50px;
+    width: 100%;
+    padding: 20px;
+    font-size: 1.5rem;
+    transition: transform 0.2s, background-color 0.2s;
 }
 
-.btn-primary:hover {
+.btn-game:hover {
     background-color: var(--golden-brown);
     border-color: var(--selective-yellow);
+    transform: scale(1.05);
+}
+
+.btn-game:active {
+    background-color: var(--golden-brown);
+    border-color: var(--selective-yellow);
+    transform: scale(1);
 }
