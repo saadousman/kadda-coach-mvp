@@ -1,0 +1,39 @@
+:root {
+    --golden-brown: #927005;
+    --selective-yellow: #FCB504;
+    --saffron: #F3BD1E;
+    --black: #040008;
+    --raisin-black: #231E25;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    color: var(--black);
+}
+
+h1 {
+    color: var(--golden-brown);
+}
+
+.card {
+    border: none;
+    margin-bottom: 20px;
+}
+
+.card-body {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background-color: var(--selective-yellow);
+    border-color: var(--golden-brown);
+    border-radius: 50px;
+}
+
+.btn-primary:hover {
+    background-color: var(--golden-brown);
+    border-color: var(--selective-yellow);
+}
